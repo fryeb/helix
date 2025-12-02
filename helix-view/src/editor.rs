@@ -27,7 +27,7 @@ use std::{
     cell::Cell,
     collections::{BTreeMap, HashMap, HashSet},
     fs,
-    io::{self, stdin},
+    io::{self, stdin, Write},
     num::{NonZeroU8, NonZeroUsize},
     path::{Path, PathBuf},
     pin::Pin,
@@ -1486,6 +1486,12 @@ impl Editor {
     }
 
     fn set_theme_impl(&mut self, theme: Theme, preview: ThemeAction) {
+        // set foreground and background colors
+        let stdout = std::io::stdout();
+        let mut stdout = stdout.lock();
+
+        write!(stdout, "\x1B]11;{}\x07\x1B]11;{}\x07", "#ffff00", "#ff00ff").unwrap();
+
         // `ui.selection` is the only scope required to be able to render a theme.
         if theme.find_highlight_exact("ui.selection").is_none() {
             self.set_error("Invalid theme: `ui.selection` required");
