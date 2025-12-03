@@ -20,6 +20,7 @@ use helix_vcs::DiffProviderRegistry;
 use futures_util::stream::select_all::SelectAll;
 use futures_util::{future, StreamExt};
 use helix_lsp::{Call, LanguageServerId};
+use termina::style::RgbColor;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use std::{
@@ -1490,7 +1491,18 @@ impl Editor {
         let stdout = std::io::stdout();
         let mut stdout = stdout.lock();
 
-        write!(stdout, "\x1B]11;{}\x07\x1B]11;{}\x07", "#ffff00", "#ff00ff").unwrap();
+        let bg = theme.get("ui.background").bg;
+        if let Some(background_color) = bg {
+            if let termina::style::ColorSpec::TrueColor(rgba_color) = background_color.into() {
+                let rgb_color: RgbColor = rgba_color.into();
+                write!(
+                    stdout,
+                    "\x1B]11;#{:02x}{:02x}{:02x}\x07",
+                    rgb_color.red, rgb_color.green, rgb_color.blue
+                )
+                .unwrap();
+            }
+        }
 
         // `ui.selection` is the only scope required to be able to render a theme.
         if theme.find_highlight_exact("ui.selection").is_none() {

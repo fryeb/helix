@@ -1213,7 +1213,7 @@ impl Application {
         // reset terminal colors
         let stdout = std::io::stdout();
         let mut stdout = stdout.lock();
-        write!(stdout, "\x1B]110\x07\x1B]111\x07")?;
+        write!(stdout, "\x1B]111\x07")?;
         self.terminal.restore()
     }
 
