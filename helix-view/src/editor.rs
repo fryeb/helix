@@ -20,7 +20,6 @@ use helix_vcs::DiffProviderRegistry;
 use futures_util::stream::select_all::SelectAll;
 use futures_util::{future, StreamExt};
 use helix_lsp::{Call, LanguageServerId};
-use termina::style::RgbColor;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use std::{
@@ -28,7 +27,7 @@ use std::{
     cell::Cell,
     collections::{BTreeMap, HashMap, HashSet},
     fs,
-    io::{self, stdin, Write},
+    io::{self, stdin},
     num::{NonZeroU8, NonZeroUsize},
     path::{Path, PathBuf},
     pin::Pin,
@@ -1487,23 +1486,6 @@ impl Editor {
     }
 
     fn set_theme_impl(&mut self, theme: Theme, preview: ThemeAction) {
-        // set foreground and background colors
-        let stdout = std::io::stdout();
-        let mut stdout = stdout.lock();
-
-        let bg = theme.get("ui.background").bg;
-        if let Some(background_color) = bg {
-            if let termina::style::ColorSpec::TrueColor(rgba_color) = background_color.into() {
-                let rgb_color: RgbColor = rgba_color.into();
-                write!(
-                    stdout,
-                    "\x1B]11;#{:02x}{:02x}{:02x}\x07",
-                    rgb_color.red, rgb_color.green, rgb_color.blue
-                )
-                .unwrap();
-            }
-        }
-
         // `ui.selection` is the only scope required to be able to render a theme.
         if theme.find_highlight_exact("ui.selection").is_none() {
             self.set_error("Invalid theme: `ui.selection` required");
